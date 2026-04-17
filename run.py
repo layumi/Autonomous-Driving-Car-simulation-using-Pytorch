@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     # define model
 
-    model = torch.load(args.model, map_location=torch.device('cpu'))
+    model = torch.load(args.model, map_location=torch.device('cpu'), weights_only=False)
 
     # check that model version is same as local PyTorch version
 

@@ -7,14 +7,27 @@ from torch.utils.data import DataLoader
 import csv
 import cv2
 from tqdm import tqdm
-from train_model import DriverNet
+from train_model import DriverNet, ft_resnet18
 import argparse
 from torchvision import transforms
 
 np.random.seed(0)
 sample = []
 
-with open('driving_log.csv') as csvfile:
+######################################################################
+# Options
+# --------
+parser = argparse.ArgumentParser(description='Behavioral Cloning Training Program')
+parser.add_argument('--data_dir', help='data directory', type=str, default='./images')
+parser.add_argument('--test_size', help='test size fraction', type=float, default=0.2)
+parser.add_argument('--keep_prob', help='drop out probability', type=float, default=0.5)
+parser.add_argument('--nb_epoch', help='number of epochs', type=int, default=10)
+parser.add_argument('--samples_per_epoch', help='samples per epoch', type=int, default=20000)
+parser.add_argument('--batchsize', help='batch size', type=int, default=128)
+parser.add_argument('--lr_rate', help='learning rate', type=float, default=3.5e-4)
+opt = parser.parse_args() 
+
+with open(opt.data_dir + '/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader, None)
     for line in reader:
@@ -22,7 +35,7 @@ with open('driving_log.csv') as csvfile:
 
 
 def augment(imgName, angle):
-    name = "IMG/" + imgName.split('\\')[-1]
+    name = imgName.split('\\')[-1]
     current_image = cv2.imread(name)
     current_image = current_image[65:-25, :, :]
     if np.random.rand() < 0.5:
@@ -57,10 +70,6 @@ class Dataset(data.Dataset):
         return len(self.samples)
 
 
-params = {'batch_size': 32,
-          'shuffle': True,
-          'num_workers': 4}
-
 
 def _my_normalization(x):
     return x / 127.5 - 1.0
@@ -69,17 +78,17 @@ def _my_normalization(x):
 transformations = transforms.Compose([transforms.Lambda(_my_normalization)])
 
 training_set = Dataset(train_samples, transformations)
-training_generator = DataLoader(training_set, **params)
+training_generator = DataLoader(training_set, batch_size=opt.batchsize, shuffle=True)
 
 validation_set = Dataset(validation_samples, transformations)
-validation_generator = DataLoader(validation_set, **params)
+validation_generator = DataLoader(validation_set,  batch_size=opt.batchsize, shuffle=False)
 
 
 def build_model():
     """
     NVIDIA model used
     Image normalization to avoid saturation and make gradients work better.
-    Convolution: 5x5, filter: 24, strides: 2x2, activation: ELU
+    Convolution: 5x5, filter: 24, strides: 4x4, activation: ELU
     Convolution: 5x5, filter: 36, strides: 2x2, activation: ELU
     Convolution: 5x5, filter: 48, strides: 2x2, activation: ELU
     Convolution: 3x3, filter: 64, strides: 1x1, activation: ELU
@@ -94,7 +103,8 @@ def build_model():
     dropout avoids overfitting
     ELU(Exponential linear unit) function takes care of the Vanishing gradient problem. 
     """
-    model = DriverNet()
+    #model = DriverNet()
+    model = ft_resnet18()
     return model
 
 
@@ -112,7 +122,7 @@ def train_model(model):
     """
     Train the model
     """
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=opt.lr_rate)
     criterion = nn.MSELoss()
     model.to(device)
     for epoch in range(epochs):
@@ -153,42 +163,10 @@ def train_model(model):
     torch.save(model, 'model.h5')
 
 
-def s2b(s):
-    """
-    Converts a string to boolean value
-    """
-    s = s.lower()
-    return s == 'true' or s == 'yes' or s == 'y' or s == '1'
+
+# build model
+model = build_model()
+# train model on data, it saves as model.h5
+train_model(model)
 
 
-def main():
-    """
-    Load train/validation data set and train the model
-    """
-    parser = argparse.ArgumentParser(description='Behavioral Cloning Training Program')
-    parser.add_argument('-d', help='data directory', dest='data_dir', type=str, default='data')
-    parser.add_argument('-t', help='test size fraction', dest='test_size', type=float, default=0.2)
-    parser.add_argument('-k', help='drop out probability', dest='keep_prob', type=float, default=0.5)
-    parser.add_argument('-n', help='number of epochs', dest='nb_epoch', type=int, default=10)
-    parser.add_argument('-s', help='samples per epoch', dest='samples_per_epoch', type=int, default=20000)
-    parser.add_argument('-b', help='batch size', dest='batch_size', type=int, default=40)
-    parser.add_argument('-o', help='save best models only', dest='save_best_only', type=s2b, default='true')
-    parser.add_argument('-l', help='learning rate', dest='learning_rate', type=float, default=1.0e-4)
-    args = parser.parse_args()
-
-    # print parameters
-    print('-' * 30)
-    print('Parameters')
-    print('-' * 30)
-    for key, value in vars(args).items():
-        print('{:<20} := {}'.format(key, value))
-    print('-' * 30)
-
-    # build model
-    model = build_model()
-    # train model on data, it saves as model.h5
-    train_model(model)
-
-
-if __name__ == '__main__':
-    main()
