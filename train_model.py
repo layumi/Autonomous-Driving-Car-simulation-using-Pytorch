@@ -27,7 +27,7 @@ class DriverNet(nn.Module):
         super(DriverNet, self).__init__()
 
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(3, 24, kernel_size=(5, 5), stride=(2, 2)),
+            nn.Conv2d(3, 24, kernel_size=(5, 5), stride=(2, 2), padding=1),
             nn.ELU(),
             nn.Conv2d(24, 36, kernel_size=(5, 5), stride=(2, 2)),
             nn.ELU(),
@@ -58,23 +58,27 @@ class DriverNet(nn.Module):
         return output
 
 
-
 class ft_resnet18(nn.Module):
     def __init__(self):
         super(ft_resnet18, self).__init__()
         self.model = models.resnet18(pretrained=True)
-        self.model.fc = nn.Sequential()
-        linear_layers = nn.Sequential(nn.Linear(512, 128), nn.BatchNorm1d(128), nn.LeakyReLU(0.1))
+        linear_layers = nn.Sequential(nn.Linear(15360, 128), nn.BatchNorm1d(128), nn.LeakyReLU(0.1))
         linear_layers.apply(weights_init_kaiming)
         classifier = nn.Sequential(nn.Dropout(p=0.9), nn.Linear(128, 1))
         classifier.apply(weights_init_classifier)
 
+        # replace avgpool and fc
+        self.model.avgpool = nn.Sequential()
+        self.model.fc = nn.Sequential()
+
+        # add new head
         self.linear_layers = linear_layers 
         self.classifier = classifier
 
     def forward(self, x):
         x = x.view(x.size(0), 3, 70, 320)
         output = self.model(x)
+        output = output.view(output.size(0), -1)
         output = self.classifier(self.linear_layers(output))
         return output
 
