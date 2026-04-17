@@ -33,10 +33,10 @@ Download Simulator
 For mac:
  
 ```bash
-APP_PATH="/Users/zhengzhedong/Desktop/课件/term2_sim_mac/term2_sim.app" # change to your path
+APP_PATH="/Users/zhengzhedong/Desktop/课件/beta_simulator_mac/beta_simulator_mac.app" # change to your path
 ls "$APP_PATH/Contents/MacOS/"   # return the real name ``term2_sim_mac``
-chmod +x "$APP_PATH/Contents/MacOS/term2_sim_mac"
-arch -x86_64 "$APP_PATH/Contents/MacOS/term2_sim_mac"
+chmod +x "$APP_PATH/Contents/MacOS/beta_simulator_mac"
+arch -x86_64 "$APP_PATH/Contents/MacOS/beta_simulator_mac"
 ```
 
 ![](Self_Driving_Car_Simulation.gif)
