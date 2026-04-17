@@ -5,26 +5,19 @@ import os
 import shutil
 import numpy as np
 import socketio
-import aiohttp
-from aiohttp import web
+import eventlet.wsgi
 from PIL import Image
 from flask import Flask
 from io import BytesIO
+from train_model import DriverNet, ft_resnet18
 
 import torch
 from torch.autograd import Variable
 import torchvision.transforms as transforms
 
-from train_model import ft_resnet18, DriverNet
-
-sio = socketio.AsyncServer(
-    cors_allowed_origins="*",
-    always_connect=True,
-    logger=False,
-    engineio_logger=False
-)
+sio = socketio.Server()
 app = Flask(__name__)
-model = DriverNet()
+model = None
 prev_image_array = None
 
 transformations = transforms.Compose(
@@ -61,8 +54,8 @@ MIN_SPEED = 10
 speed_limit = MAX_SPEED
 
 
-@sio.on('telemetry', namespace='/')
-async def telemetry(sid, data):
+@sio.on('telemetry')
+def telemetry(sid, data):
     if data:
 
         # The current steering angle of the car
@@ -73,7 +66,7 @@ async def telemetry(sid, data):
 
         # The current speed of the car
         speed = float(data["speed"])
-        
+
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
 
         image_array = np.array(image.copy())
@@ -83,10 +76,11 @@ async def telemetry(sid, data):
         image_array = image_array[:, :, ::-1]
         image_array = transformations(image_array)
         image_tensor = torch.Tensor(image_array)
-        image_tensor = image_tensor.unsqueeze(0)  # shape: (1, 3, 70, 320)
+        image_tensor = image_tensor.view(1, 3, 70, 320)
+        image_tensor = Variable(image_tensor)
 
-        with torch.no_grad():
-            steering_angle = model(image_tensor).view(-1).data.numpy()[0]
+        steering_angle = model(image_tensor).view(-1).data.numpy()[0]
+
         # throttle = controller.update(float(speed))
 
         global speed_limit
@@ -111,35 +105,32 @@ async def telemetry(sid, data):
         sio.emit('manual', data={}, skip_sid=True)
 
 
-@sio.on('connect', namespace='/')
-async def connect(sid, environ):
+@sio.on('connect')
+def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0)
 
 
-async def send_control(steering_angle, throttle):
+def send_control(steering_angle, throttle):
     sio.emit(
         "steer",
         data={
             'steering_angle': steering_angle.__str__(),
             'throttle': throttle.__str__()
         },
-        to=sid,              # ✅ 发给特定会话
-        namespace='/'        # ✅ 显式指定命名空间
-    )
+        skip_sid=True)
 
 
 if __name__ == '__main__':
     """Testing phase."""
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument(
-        '--model',
+        'model',
         type=str,
-        default='model.pth',
         help='Path to model h5 file. Model should be on the same path.'
     )
     parser.add_argument(
-        '--image_folder',
+        'image_folder',
         type=str,
         nargs='?',
         default='',
@@ -148,8 +139,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # define model
-    print('loading'+args.model)
-    model.load_state_dict(torch.load(args.model, map_location='cpu'))
+
+    model = DriverNet()
+    model = model.load_state_dict(torch.load(args.model, map_location=torch.device('cpu')))
     model.eval()
 
     # check that model version is same as local PyTorch version
@@ -166,6 +158,7 @@ if __name__ == '__main__':
         print("NOT RECORDING THIS RUN ...")
 
     # wrap Flask application with engineio's middleware
-    aiohttp_app = web.Application()
-    sio.attach(aiohttp_app, socketio_path='socket.io')
-    web.run_app(aiohttp_app, host='0.0.0.0', port=4567)
+    app = socketio.Middleware(sio, app)
+
+    # deploy as an eventlet WSGI server
+    eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
