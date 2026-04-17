@@ -16,7 +16,13 @@ import torchvision.transforms as transforms
 
 from train_model import ft_resnet18, DriverNet
 
-sio = socketio.Server()
+sio = socketio.Server(
+    cors_allowed_origins="*",      # ✅ 允许模拟器跨域连接
+    async_mode='eventlet',         # ✅ 显式指定 eventlet 后端
+    logger=False,                   # ✅ 打开调试日志
+    engineio_logger=True,          # ✅ 打印底层握手日志
+    always_connect=True 
+)
 app = Flask(__name__)
 model = DriverNet()
 prev_image_array = None
@@ -55,7 +61,7 @@ MIN_SPEED = 10
 speed_limit = MAX_SPEED
 
 
-@sio.on('telemetry')
+@sio.on('telemetry', namespace='/')
 def telemetry(sid, data):
     if data:
 
@@ -67,7 +73,7 @@ def telemetry(sid, data):
 
         # The current speed of the car
         speed = float(data["speed"])
-
+        
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
 
         image_array = np.array(image.copy())
@@ -81,7 +87,6 @@ def telemetry(sid, data):
 
         with torch.no_grad():
             steering_angle = model(image_tensor).view(-1).data.numpy()[0]
-
         # throttle = controller.update(float(speed))
 
         global speed_limit
@@ -106,7 +111,7 @@ def telemetry(sid, data):
         sio.emit('manual', data={}, skip_sid=True)
 
 
-@sio.on('connect')
+@sio.on('connect', namespace='/')
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0)
@@ -119,7 +124,9 @@ def send_control(steering_angle, throttle):
             'steering_angle': steering_angle.__str__(),
             'throttle': throttle.__str__()
         },
-        skip_sid=True)
+        to=sid,              # ✅ 发给特定会话
+        namespace='/'        # ✅ 显式指定命名空间
+    )
 
 
 if __name__ == '__main__':
