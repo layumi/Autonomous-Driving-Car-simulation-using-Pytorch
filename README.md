@@ -44,6 +44,8 @@ arch -x86_64 "$APP_PATH/Contents/MacOS/beta_simulator_mac"
 # 💥HOW TO USE :
    * Install all the required dependencies defined in the requirements.txt.
 ```
+conda create --name AD python=3.11
+conda activate AD
 pip install -r requirements.txt
 ```
    * This application can be used by executing the run.py file.
