@@ -54,7 +54,6 @@ class DriverNet(nn.Module):
         x = x.view(x.size(0), 3, 70, 320)
         output = self.conv_layers(x)
         output = output.view(output.size(0), -1)
-        print(output.shape)
         output = self.linear_layers(output)
         return output
 
@@ -67,7 +66,7 @@ class ft_resnet18(nn.Module):
         self.model.fc = nn.Sequential()
         linear_layers = nn.Sequential(nn.Linear(512, 128), nn.BatchNorm1d(128), nn.LeakyReLU(0.1))
         linear_layers.apply(weights_init_kaiming)
-        classifier = nn.Sequential(nn.Dropout(p=0.5), nn.Linear(128, 1))
+        classifier = nn.Sequential(nn.Dropout(p=0.9), nn.Linear(128, 1))
         classifier.apply(weights_init_classifier)
 
         self.linear_layers = linear_layers 

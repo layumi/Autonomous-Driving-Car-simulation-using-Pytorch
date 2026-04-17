@@ -33,9 +33,9 @@ with open(opt.data_dir + '/driving_log.csv') as csvfile:
     for line in reader:
         sample.append(line)
 
-
 def augment(imgName, angle):
-    name = imgName.split('\\')[-1]
+    # new path in case you change your machine.
+    name = opt.data_dir + '/IMG/' +imgName.split('/')[-1]
     current_image = cv2.imread(name)
     current_image = current_image[65:-25, :, :]
     if np.random.rand() < 0.5:
@@ -103,8 +103,8 @@ def build_model():
     dropout avoids overfitting
     ELU(Exponential linear unit) function takes care of the Vanishing gradient problem. 
     """
-    #model = DriverNet()
-    model = ft_resnet18()
+    model = DriverNet()
+    #model = ft_resnet18()
     return model
 
 
@@ -160,7 +160,7 @@ def train_model(model):
                     valid_total += 1
         print('epoch:{} \t train_loss: {} \t valid_loss:{}'.format(epoch, train_loss / train_total,
                                                                    valid_loss / valid_total))
-    torch.save(model, 'model.h5')
+    torch.save(model, 'model.pth')
 
 
 
