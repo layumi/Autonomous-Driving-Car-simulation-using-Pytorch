@@ -5,7 +5,8 @@ import os
 import shutil
 import numpy as np
 import socketio
-import eventlet.wsgi
+import aiohttp
+from aiohttp import web
 from PIL import Image
 from flask import Flask
 from io import BytesIO
@@ -16,12 +17,11 @@ import torchvision.transforms as transforms
 
 from train_model import ft_resnet18, DriverNet
 
-sio = socketio.Server(
-    cors_allowed_origins="*",      # ✅ 允许模拟器跨域连接
-    async_mode='eventlet',         # ✅ 显式指定 eventlet 后端
-    logger=False,                   # ✅ 打开调试日志
-    engineio_logger=True,          # ✅ 打印底层握手日志
-    always_connect=True 
+sio = socketio.AsyncServer(
+    cors_allowed_origins="*",
+    always_connect=True,
+    logger=False,
+    engineio_logger=False
 )
 app = Flask(__name__)
 model = DriverNet()
@@ -62,7 +62,7 @@ speed_limit = MAX_SPEED
 
 
 @sio.on('telemetry', namespace='/')
-def telemetry(sid, data):
+async def telemetry(sid, data):
     if data:
 
         # The current steering angle of the car
@@ -112,12 +112,12 @@ def telemetry(sid, data):
 
 
 @sio.on('connect', namespace='/')
-def connect(sid, environ):
+async def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0)
 
 
-def send_control(steering_angle, throttle):
+async def send_control(steering_angle, throttle):
     sio.emit(
         "steer",
         data={
@@ -166,7 +166,6 @@ if __name__ == '__main__':
         print("NOT RECORDING THIS RUN ...")
 
     # wrap Flask application with engineio's middleware
-    app = socketio.Middleware(sio, app)
-
-    # deploy as an eventlet WSGI server
-    eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
+    aiohttp_app = web.Application()
+    sio.attach(aiohttp_app, socketio_path='socket.io')
+    web.run_app(aiohttp_app, host='0.0.0.0', port=4567)
