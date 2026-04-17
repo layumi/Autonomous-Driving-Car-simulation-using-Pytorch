@@ -23,6 +23,11 @@
    * Training mode: We have to generate train images by use of manual driving. The train images are generated along with the driving csv file which contains the path of each image captured and also the steering angle at each instance.
    * Autonomous mode: After we are done with training our model, we can test it by deploying the model on the simulator.
 
+Download Simulator
+- Windows：https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/Term1-Sim/term1-simulator-windows.zip
+- Mac：https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/Term1-Sim/term1-simulator-mac.zip
+- Linux：https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/Term1-Sim/term1-simulator-linux.zip
+(source at https://github.com/udacity/self-driving-car-sim)
 
 ![](Self_Driving_Car_Simulation.gif)
 
