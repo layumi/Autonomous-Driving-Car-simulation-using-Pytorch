@@ -18,7 +18,7 @@ from train_model import ft_resnet18, DriverNet
 
 sio = socketio.Server()
 app = Flask(__name__)
-model = None
+model = DriverNet()
 prev_image_array = None
 
 transformations = transforms.Compose(
@@ -77,10 +77,10 @@ def telemetry(sid, data):
         image_array = image_array[:, :, ::-1]
         image_array = transformations(image_array)
         image_tensor = torch.Tensor(image_array)
-        image_tensor = image_tensor.view(1, 3, 70, 320)
-        image_tensor = Variable(image_tensor)
+        image_tensor = image_tensor.unsqueeze(0)  # shape: (1, 3, 70, 320)
 
-        steering_angle = model(image_tensor).view(-1).data.numpy()[0]
+        with torch.no_grad():
+            steering_angle = model(image_tensor).view(-1).data.numpy()[0]
 
         # throttle = controller.update(float(speed))
 
@@ -126,13 +126,13 @@ if __name__ == '__main__':
     """Testing phase."""
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument(
-        'model',
+        '--model',
         type=str,
         default='model.pth',
         help='Path to model h5 file. Model should be on the same path.'
     )
     parser.add_argument(
-        'image_folder',
+        '--image_folder',
         type=str,
         nargs='?',
         default='',
@@ -141,8 +141,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # define model
-    model = DriverNet()
-    model.load_state_dict(args.model)
+    print('loading'+args.model)
+    model.load_state_dict(torch.load(args.model, map_location='cpu'))
     model.eval()
 
     # check that model version is same as local PyTorch version
