@@ -28,6 +28,9 @@
 
 # 💥HOW TO USE :
    * Install all the required dependencies defined in the requirements.txt.
+```
+pip install -r requirements.txt
+```
    * This application can be used by executing the run.py file.
    * The model could be run by executing this command on the terminal  "python run.py model.h5".
    * If you are using your own model, then replace model.h5 with your model's path in the command.
