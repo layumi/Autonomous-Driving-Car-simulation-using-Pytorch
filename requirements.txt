@@ -7,7 +7,7 @@ chardet==4.0.0
 click==7.1.2
 cycler==0.10.0
 dnspython
-eventlet
+eventlet==0.30.2
 Flask==1.1.2
 Flask-SocketIO==5.0.1
 flatbuffers
@@ -32,8 +32,8 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pyparsing==2.4.7
 python-dateutil
-python-engineio
-python-socketio
+python-engineio==3.13.2
+python-socketio==4.6.1
 pytz==2021.1
 PyYAML
 requests==2.25.1

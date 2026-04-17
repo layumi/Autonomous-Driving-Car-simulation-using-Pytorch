@@ -76,9 +76,7 @@ def telemetry(sid, data):
         # transform RGB to BGR for cv2
         image_array = image_array[:, :, ::-1]
         image_array = transformations(image_array)
-        image_tensor = torch.Tensor(image_array)
-        image_tensor = image_tensor.view(1, 3, 70, 320)
-        image_tensor = Variable(image_tensor)
+        image_tensor = torch.Tensor(image_array).unsqueeze(0)
 
         steering_angle = model(image_tensor).view(-1).data.numpy()[0]
 
