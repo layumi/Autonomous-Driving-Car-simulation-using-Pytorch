@@ -46,11 +46,11 @@ class SimplePIController:
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 10
+set_speed = 25
 controller.set_desired(set_speed)
 
-MAX_SPEED = 15
-MIN_SPEED = 10
+MAX_SPEED = 30
+MIN_SPEED = 20
 speed_limit = MAX_SPEED
 
 
@@ -78,7 +78,8 @@ def telemetry(sid, data):
         image_array = transformations(image_array)
         image_tensor = torch.Tensor(image_array).unsqueeze(0)
 
-        steering_angle = model(image_tensor).view(-1).data.numpy()[0]
+        with torch.no_grad():
+            steering_angle = model(image_tensor).view(-1).data.numpy()[0]
 
         # throttle = controller.update(float(speed))
 
