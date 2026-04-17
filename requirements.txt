@@ -21,7 +21,7 @@ h5py>=3.11.0
 idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.3
-joblib==1.0.1
+joblib
 tensorflow==2.15.1
 tensorflow-estimator==2.15.0
 Keras
