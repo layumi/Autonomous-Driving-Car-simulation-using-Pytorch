@@ -29,6 +29,16 @@ Download Simulator
 - Linux：https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/Term1-Sim/term1-simulator-linux.zip
 (source at https://github.com/udacity/self-driving-car-sim)
 
+
+For mac:
+ 
+```bash
+APP_PATH="/Users/zhengzhedong/Desktop/课件/term2_sim_mac/term2_sim.app" # change to your path
+ls "$APP_PATH/Contents/MacOS/"   # return the real name ``term2_sim_mac``
+chmod +x "$APP_PATH/Contents/MacOS/term2_sim_mac"
+arch -x86_64 "$APP_PATH/Contents/MacOS/term2_sim_mac"
+```
+
 ![](Self_Driving_Car_Simulation.gif)
 
 # 💥HOW TO USE :
