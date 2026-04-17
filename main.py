@@ -160,7 +160,7 @@ def train_model(model):
                     valid_total += 1
         print('epoch:{} \t train_loss: {} \t valid_loss:{}'.format(epoch, train_loss / train_total,
                                                                    valid_loss / valid_total))
-    torch.save(model, 'model.pth')
+    torch.save(model.state_dict(), 'model.pth')
 
 
 

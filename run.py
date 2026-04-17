@@ -14,6 +14,8 @@ import torch
 from torch.autograd import Variable
 import torchvision.transforms as transforms
 
+from train_model import ft_resnet18, DriverNet
+
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
@@ -139,8 +141,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # define model
-
-    model = torch.load(args.model, map_location=torch.device('cpu'), weights_only=False)
+    model = DriverNet()
+    model.load_state_dict(args.model)
+    model.eval()
 
     # check that model version is same as local PyTorch version
 
