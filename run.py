@@ -56,6 +56,7 @@ speed_limit = MAX_SPEED
 
 @sio.on('telemetry')
 def telemetry(sid, data):
+    print('welcome to the control part!')
     if data:
 
         # The current steering angle of the car
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     """Testing phase."""
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument(
-        'model',
+        '--model',
         type=str,
         help='Path to model h5 file. Model should be on the same path.'
     )
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     # define model
 
     model = DriverNet()
-    model = model.load_state_dict(torch.load(args.model, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(args.model, map_location=torch.device('cpu')))
     model.eval()
 
     # check that model version is same as local PyTorch version
