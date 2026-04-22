@@ -46,7 +46,7 @@ Install Anaconda Windows, and search anacoda power shell
 ```power shell
 winget install Git.Git #install github
 ```
-Install Visual Studio
+Install Visual Studio (if needed)
 https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/?spm=a2ty_o01.29997173.0.0.2bcb55fbEPinaO
 
 # Aliyun Mirror
