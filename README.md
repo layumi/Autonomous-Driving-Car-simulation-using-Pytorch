@@ -77,3 +77,7 @@ python run.py --model model-general.pth
 
 Enjoy the ride😊😊
 
+# Train 
+```bash
+python main.py --data images/
+```
