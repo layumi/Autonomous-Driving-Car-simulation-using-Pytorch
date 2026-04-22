@@ -9,7 +9,7 @@ cycler==0.10.0
 dnspython
 eventlet==0.30.2
 Flask==1.1.2
-Flask-SocketIO==5.0.1
+Flask-SocketIO==4.3.2
 flatbuffers
 gast==0.3.3
 google-auth
