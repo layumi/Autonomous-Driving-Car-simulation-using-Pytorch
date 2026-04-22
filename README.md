@@ -41,11 +41,19 @@ arch -x86_64 "$APP_PATH/Contents/MacOS/beta_simulator_mac"
 
 ![](Self_Driving_Car_Simulation.gif)
 
+# Windows
+Install Anaconda Windows, and search anacoda power shell
+```power shell
+winget install Git.Git #install github
+```
+
 # 💥HOW TO USE :
    * Install all the required dependencies defined in the requirements.txt.
 ```bash
 conda create --name AD python=3.9
 conda activate AD
+git clone https://github.com/layumi/Autonomous-Driving-Car-simulation-using-Pytorch.git
+cd Autonomous-Driving-Car-simulation-using-Pytorch
 pip install -r requirements.txt
 ```
    * This application can be used by executing the run.py file.
