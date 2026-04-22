@@ -47,6 +47,14 @@ Install Anaconda Windows, and search anacoda power shell
 winget install Git.Git #install github
 ```
 
+# Aliyun Mirror
+Make your pip faster at Macau.
+```
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
+pip config set install.trusted-host mirrors.aliyun.com
+```
+
+
 # 💥HOW TO USE :
    * Install all the required dependencies defined in the requirements.txt.
 ```bash
