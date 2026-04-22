@@ -15,7 +15,7 @@ gast==0.3.3
 google-auth
 google-auth-oauthlib
 google-pasta
-greenlet
+greenlet==3.2.3
 grpcio
 h5py>=3.11.0
 idna==2.10
