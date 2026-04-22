@@ -47,17 +47,14 @@ class DriverNet(nn.Module):
             nn.ELU(),
             nn.Linear(in_features=64, out_features=10),
             nn.ELU(),
+            nn.Linear(in_features=10, out_features=1)
         )
-        self.linear_layers.apply(weights_init_kaiming)
-        self.classifier =  nn.Linear(in_features=10, out_features=1)
-        self.classifier.apply(weights_init_classifier)
 
     def forward(self, x):
         x = x.view(x.size(0), 3, 70, 320)
         output = self.conv_layers(x)
         output = output.view(output.size(0), -1)
         output = self.linear_layers(output)
-        output = self.classifier(output)
         return output
 
 
